@@ -1,0 +1,144 @@
+<html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="X-UA-Compatible" content="ie=edge">
+            <title>Image</title>
+            <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+            <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+        </head>
+        <style>
+        .container{
+            position: absolute;
+            width:400px;
+            /* height:400px; */
+            background-color: #0F172A;
+        }
+        
+        .Motienr{  
+        position: absolute;
+        width: 368px;
+        height: 45px;
+        top: 2px;
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 700;
+        font-size: 15px;
+
+        display: block;
+        /* max-height: 50px; */
+        /* line-height: 1.8em; */
+        overflow: hidden;
+
+        /* white-space: nowrap; overflow: scroll; */
+        line-height: 23px;
+        display: flex;
+        align-items: center;
+        color: #FFFFFF;
+        }
+        
+        .redbar{
+            position: absolute;
+        width: 370px;
+        height: 27px;
+        top: 48px;
+        background: #BE123C;
+        }
+        
+        .greenbar{
+            position: absolute;
+            width: 304px;
+            height: 27px;
+            background: #047857;
+        }
+        
+        .stemmenVoor{
+            position: absolute;
+            width: 140px;
+            height: 27px;
+            left: 5px;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 700;
+            font-size: 20px;
+            line-height: 23px;
+            display: flex;
+            align-items: center;
+        
+            color: #FFFFFF;
+        }
+        
+        .middellijn{
+            position: absolute;
+            height: 27px;
+            left: 184px;
+            border: 1px dashed #FFFFFF;
+        }
+        
+        
+        .material-io{
+            position: absolute;
+            font-size: 32px !important;
+            margin: -2px;
+        }
+        
+        .voor{
+            color:#047857;
+        }
+        
+        .tegen{
+            color:#BE123C;
+        }
+
+        .ongekend{
+            color:#94A3B8;
+        }
+        
+        .fractie{
+            width: 146px;
+            height: 26px;
+            margin-left: 35px;
+            margin-top: 2px;
+            
+            overflow: hidden;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 700;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            color: #FFFFFF;
+        }
+        
+        .stemmingen{
+            margin-top: 78px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 5px;
+            
+        }
+        
+        .stemming{
+            width: 50%;
+            margin-top: 3px;
+            height: 28px;
+        }
+        </style>
+        <body>
+            <div class="container">
+                <p class="Motienr" id="motienr">Motie 36088-13</p>
+                <div class="redbar">
+                    <div class="greenbar" id="greenbar">
+                        <p class="stemmenVoor" id="stemmenVoor">142</p>
+                        <div class="middellijn"></div>
+                    </div>
+                </div>
+                <div class="stemmingen">
+
+                </div>
+            </div>
+        </body>
+    </html>
