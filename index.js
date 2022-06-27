@@ -123,7 +123,7 @@ const newMotiesThisHour = async () => {
     }
     try {
         const newMotiesRes = await fetch(
-            `https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/Besluit?$filter=Verwijderd eq false and (BesluitSoort eq 'Stemmen - aangenomen' or BesluitSoort eq 'Stemmen - verworpen') and GewijzigdOp ge ${currentDateTime}&$orderby=GewijzigdOp desc&$top=1&$expand=Zaak`
+            `https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/Besluit?$filter=Verwijderd eq false and (BesluitSoort eq 'Stemmen - aangenomen' or BesluitSoort eq 'Stemmen - verworpen') and GewijzigdOp ge ${currentDateTime}&$orderby=GewijzigdOp desc&$expand=Zaak`
         )
         const data = await newMotiesRes.json();
         console.log(await data)
