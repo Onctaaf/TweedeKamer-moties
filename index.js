@@ -123,9 +123,10 @@ const newMotiesThisHour = async () => {
     }
     try {
         const newMotiesRes = await fetch(
-            `https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/Besluit?$filter=Verwijderd eq false and (BesluitSoort eq 'Stemmen - aangenomen' or BesluitSoort eq 'Stemmen - verworpen') and GewijzigdOp ge ${currentDateTime}&$orderby=GewijzigdOp desc&$expand=Zaak`
+            `https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/Besluit?$filter=Verwijderd eq false and (BesluitSoort eq 'Stemmen - aangenomen' or BesluitSoort eq 'Stemmen - verworpen') and GewijzigdOp ge ${currentDateTime}&$orderby=GewijzigdOp desc&$top=1&$expand=Zaak`
         )
         const data = await newMotiesRes.json();
+        console.log(await data)
         return await data;
     } catch (error) {
         console.log(error);
@@ -200,6 +201,7 @@ const createStemmingImg = async (stemmingen, zaak) => {
     cheeriofile('#stemmenVoor').text(StemmenVoor);
     cheeriofile('#greenbar').css('width', `${(StemmenVoor/150)*100}%`);
     generationHTML = cheeriofile.html();
+    console.log("Creating image")
     
     nodeHtmlToImage({
         output: `./images/${zaak[0].Nummer}.png`,
@@ -214,7 +216,7 @@ const createStemmingImg = async (stemmingen, zaak) => {
             
         },
         html: `${generationHTML}`
-    }).then(() => console.log('The image was created successfully!')).catch(err => console.error('Something went wrong:', err));
+    }).then(() => shareMotie(zaak[0].Nummer, TweetText)).catch(err => console.error('Something went wrong:', err));
     var TweetOnderwerp = zaak[0].Onderwerp
     if (TweetOnderwerp.length > 235) {
         TweetOnderwerp = TweetOnderwerp.substring(0, 235) + "...";
@@ -226,7 +228,7 @@ const createStemmingImg = async (stemmingen, zaak) => {
     }
     const TweetText = `${TweetOnderwerp}, is ${motiestatus}. #TweedeKamer #motie`;
     // console.log(TweetText)
-    shareMotie(zaak[0].Nummer, TweetText);
+    // shareMotie(zaak[0].Nummer, TweetText);
 }
 
 every30minutes()
