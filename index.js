@@ -130,19 +130,27 @@ const every30minutes = async () => {
 
 
 const newMotiesThisHour = async () => {
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth() +1;
-    const currentDay = new Date().getDate();
+    const currentYear = moment().format('YYYY');
+    const currentMonth = moment().format(`MM`);
+    const currentDay = moment().format(`DD`);
     const currentHour = new Date().getHours();
     const currentMinute = new Date().getMinutes();
     const currentDate = new Date().getTime();
     var testtime = moment().format(`yyyy-MM-DDTHH:mm`)
     var currentDateTime = testtime + ":00.0-02:00"
-    if (currentHour < 18) {
-        currentDateTime = currentDateTime.replaceAt(8, `${currentDay - 1}`)
-        currentDateTime = currentDateTime.replaceAt(11, `11`)
+    if (currentDay < 1) {
+        currentDateTime = currentDateTime.replaceAt(6, `${currentMonth - 1}`)
+        currentDateTime = currentDateTime.replaceAt(8, `30`)
+        if (currentMonth - 1 === 0) {
+            currentDateTime = currentDateTime.replaceAt(5, `12`)
+            currentDateTime = currentDateTime.replaceAt(7, `${currentYear - 1}`)
+        }
+        //if it's february change the day to 28
+        if (currentMonth - 1 === 1) {
+            currentDateTime = currentDateTime.replaceAt(8, `28`)
+        }
     } else {
-        currentDateTime = currentDateTime.replaceAt(11, `${currentHour - 15}`)
+        currentDateTime = currentDateTime.replaceAt(8, `${currentDay - 1}`)
     }
     try {
         console.log(            `https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/Besluit?$filter=Verwijderd eq false and (BesluitSoort eq 'Stemmen - aangenomen' or BesluitSoort eq 'Stemmen - verworpen') and GewijzigdOp ge ${currentDateTime}&$orderby=GewijzigdOp desc&$expand=Zaak`
