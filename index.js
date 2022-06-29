@@ -227,7 +227,8 @@ const createStemmingImgHoofdelijk = async (stemmingen, zaak) => {
     nodeHtmlToImage({
         output: `./images/${zaak[0].Nummer}.png`,
         selector: '.container',
-        puppeteerArgs: {StemmenVoor, stemmingen},
+        puppeteerArgs: {executablePath: '/usr/bin/chromium-browser',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']},
         beforeScreenshot: function (page) {
             page.setViewport({
                 width: 800,
@@ -312,7 +313,8 @@ const createStemmingImg = async (stemmingen, zaak) => {
     nodeHtmlToImage({
         output: `./images/${zaak[0].Nummer}.png`,
         selector: '.container',
-        puppeteerArgs: {StemmenVoor, stemmingen},
+        puppeteerArgs: {executablePath: '/usr/bin/chromium-browser',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']},
         beforeScreenshot: function (page) {
             page.setViewport({
                 width: 800,
