@@ -35,7 +35,7 @@ var T = new Twit({
 var job = new CronJob(
 	'0,30 * * * *',
 	function() {
-		every30minutes();
+		every30minutes().then(() => {console.log(`Done with every30minutes() at ${moment().format(`yyyy-MM-DDTHH:mm`)}`)});
 	},
 	null,
 	true,
@@ -45,6 +45,7 @@ var job = new CronJob(
 
 const shareMotie = async (filename, tweetText) => {
     let b64content = fs.readFileSync(`./images/${filename}.png`, { encoding: 'base64' });
+    // return console.log("we not tweeting boys")
     T.post('media/upload', { media_data: b64content }, function (err, data, response) {
         // now we can assign alt text to the media, for use by screen readers and
         // other text-based presentations and interpreters
@@ -78,6 +79,7 @@ const every30minutes = async () => {
 
     let moties = await newMotiesThisHour();
     //for each new motie get the stemmingen using it's Besluit_Id
+    
     for (let i = 0; i < await moties.value.length; i++) {
         // wait for the previous iteration to finish
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -86,22 +88,43 @@ const every30minutes = async () => {
         let besluitId = await motie.Id;
         // let zaak_id = await motie.Zaak.Id;
         //if besluitId is not in the database
-        let checkIfExists = await con.query(`SELECT * FROM verwerkt WHERE Besluit_Id = '${besluitId}'`, async function (err, result) {
-            if (err) throw err;
 
-            if (result.length === 0) {
-                //insert besluitId in the database
-                con.query(`INSERT INTO verwerkt (Besluit_Id) VALUES ('${besluitId}')`, function (err, result) {
-                    if (err) throw err;
-                });
-                //get the stemmingen from the API
-                let stemmingen = await getStemmingen(besluitId);
-                createStemmingImg(stemmingen, zaak);
-                // console.log(await stemmingen);
-            } else{
-                // console.log("already exists");
-            }
-        });
+        let stemmingen = await getStemmingen(besluitId);
+        console.log(`${await stemmingen.value.length} stemmingen gevonden voor motie ${await besluitId}`)
+        // if(await stemmingen.value.length > 0 && stemmingen.value.length < 30) {
+            // console.log(motie.Zaak)
+            let checkIfExists = await con.query(`SELECT * FROM verwerkt WHERE Besluit_Id = '${besluitId}'`, async function (err, result) {
+                if (err) throw err;
+
+                if (result.length === 0) {
+                    if(await stemmingen.value.length > 0 && stemmingen.value.length < 30) {
+                    //insert besluitId in the database
+                    con.query(`INSERT INTO verwerkt (Besluit_Id) VALUES ('${besluitId}')`, function (err, result) {
+                        if (err) throw err;
+                    });
+                    //get the stemmingen from the API
+                        createStemmingImg(stemmingen, zaak);
+                    
+
+
+                    } else if (stemmingen.value.length >= 30){
+                        console.log("Hoofdelijke stemming. Overslaan voor nu.")
+                        con.query(`INSERT INTO verwerkt (Besluit_Id) VALUES ('${besluitId}')`, function (err, result) {
+                            if (err) throw err;
+                        });
+                        createStemmingImgHoofdelijk(stemmingen, zaak);
+                    }
+                    // console.log(await stemmingen);
+                } else{
+                    console.log("already exists");
+                }
+            });
+        // } else if (stemmingen.value.length >= 30){
+        //     console.log("Hoofdelijke stemming. Overslaan voor nu.")
+        //     con.query(`INSERT INTO verwerkt (Besluit_Id) VALUES ('${besluitId}')`, function (err, result) {
+        //         if (err) throw err;
+        //     });
+        // }
     }
 }
 
@@ -115,18 +138,20 @@ const newMotiesThisHour = async () => {
     const currentDate = new Date().getTime();
     var testtime = moment().format(`yyyy-MM-DDTHH:mm`)
     var currentDateTime = testtime + ":00.0-02:00"
-    if (currentHour === 0) {
+    if (currentHour < 18) {
         currentDateTime = currentDateTime.replaceAt(8, `${currentDay - 1}`)
-        currentDateTime = currentDateTime.replaceAt(11, `23`)
+        currentDateTime = currentDateTime.replaceAt(11, `11`)
     } else {
-        currentDateTime = currentDateTime.replaceAt(11, `${currentHour - 1}`)
+        currentDateTime = currentDateTime.replaceAt(11, `${currentHour - 15}`)
     }
     try {
+        console.log(            `https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/Besluit?$filter=Verwijderd eq false and (BesluitSoort eq 'Stemmen - aangenomen' or BesluitSoort eq 'Stemmen - verworpen') and GewijzigdOp ge ${currentDateTime}&$orderby=GewijzigdOp desc&$expand=Zaak`
+        )
         const newMotiesRes = await fetch(
             `https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/Besluit?$filter=Verwijderd eq false and (BesluitSoort eq 'Stemmen - aangenomen' or BesluitSoort eq 'Stemmen - verworpen') and GewijzigdOp ge ${currentDateTime}&$orderby=GewijzigdOp desc&$expand=Zaak`
         )
         const data = await newMotiesRes.json();
-        console.log(await data)
+        // console.log(await data)
         return await data;
     } catch (error) {
         console.log(error);
@@ -145,6 +170,87 @@ const getStemmingen = async (Besluit_Id) => {
         console.log(error);
     }
 };
+
+const createStemmingImgHoofdelijk = async (stemmingen, zaak) => {
+    let actorFractieDict = {};
+    // console.log(stemmingen)
+    // console.log(zaak[0].Titel)
+    //populate actorFractieDict with all stemmingen.value.actorFractie as key and stemmingen.value.soort as value
+    let StemmenVoor = 0;
+    for (let i = 0; i < await stemmingen.value.length; i++) {
+        let stemming = await stemmingen.value[i];
+        if(stemming.ActorFractie in actorFractieDict) {
+        } else{
+            actorFractieDict[stemming.ActorFractie] = [stemming.FractieGrootte, 0, 0, 0];
+        }
+        if(stemming.Soort === "Voor"){
+            StemmenVoor = StemmenVoor + 1;
+            actorFractieDict[stemming.ActorFractie][1] += 1;
+        } else if(stemming.Soort === "Tegen"){
+            actorFractieDict[stemming.ActorFractie][2] += 1;
+        } else {
+            actorFractieDict[stemming.ActorFractie][3] += 1;
+        }
+    }
+    // return console.log(actorFractieDict);
+    const keys = Object.keys(actorFractieDict);
+    // console.log(keys);
+    let generationHTML = fs.readFileSync("./generation_hoofdelijk.html", "utf8");
+    const cheeriofile = cheerio.load(generationHTML);
+    var Onderwerp = zaak[0].Onderwerp
+    if(zaak[0].Onderwerp.startsWith("Motie van het ")){
+        Onderwerp = zaak[0].Onderwerp.replace("Motie van het ", "");
+    }
+    // Onderwerp = zaak[0].Onderwerp + "t ere jn jfnkja fnjka najdnkjfn skajdfnsa kn";
+    if (Onderwerp.length > 90) {
+        Onderwerp = Onderwerp.substring(0, 90) + "...";
+    }
+    cheeriofile('#motienr').text(Onderwerp);
+    keys.sort().forEach((key, index) => {
+        const value = actorFractieDict[key];
+        const fractiegrootte = value[1];
+        let verhouding = `<span class="ongekend"><span class="Voor">${Lamount(value[1])}</span><span class="Tegen">${Lamount(value[2])}</span>${Lamount(value[3])}</span>`
+            cheeriofile('.stemmingen').append(`
+                <div class="stemming">
+                        <p class="fractie">${key}</p>
+                        <p class=" verhouding">${verhouding}</p>
+                    </div>`
+            )
+        
+    }) 
+    // console.log(StemmenVoor);
+    cheeriofile('#stemmenVoor').text(StemmenVoor);
+    cheeriofile('#greenbar').css('width', `${(StemmenVoor/150)*100}%`);
+    generationHTML = cheeriofile.html();
+    console.log("Creating image")
+    
+    nodeHtmlToImage({
+        output: `./images/${zaak[0].Nummer}.png`,
+        selector: '.container',
+        puppeteerArgs: {StemmenVoor, stemmingen},
+        beforeScreenshot: function (page) {
+            page.setViewport({
+                width: 800,
+                height: 800,
+                deviceScaleFactor: 3,
+            });
+            
+        },
+        html: `${generationHTML}`
+    }).then(() => shareMotie(zaak[0].Nummer, TweetText)).catch(err => console.error('Something went wrong:', err));
+    var TweetOnderwerp = zaak[0].Onderwerp
+    if (TweetOnderwerp.length > 235) {
+        TweetOnderwerp = TweetOnderwerp.substring(0, 235) + "...";
+    }
+    if(StemmenVoor > 75){
+        motiestatus = "aangenomen"
+    } else{
+        motiestatus = "verworpen"
+    }
+    const TweetText = `${TweetOnderwerp}, is ${motiestatus}. #TweedeKamer #motie`;
+    // console.log(TweetText)
+    // shareMotie(zaak[0].Nummer, TweetText);
+}
 
 const createStemmingImg = async (stemmingen, zaak) => {
     let actorFractieDict = {};
@@ -231,4 +337,15 @@ const createStemmingImg = async (stemmingen, zaak) => {
     // shareMotie(zaak[0].Nummer, TweetText);
 }
 
-every30minutes()
+//create Lamount function
+const Lamount = (x) => {
+    //return a string with x amount of l's
+    let l = "";
+    for (let i = 0; i < x; i++) {
+        l += "l";
+    }
+    return l;
+}
+
+let d = new Date();
+every30minutes().then(() => {console.log(`Done with every30minutes() at ${moment().format(`yyyy-MM-DDTHH:mm`)}`)});
