@@ -45,7 +45,7 @@ var job = new CronJob(
 
 const shareMotie = async (filename, tweetText) => {
     let b64content = fs.readFileSync(`./images/${filename}.png`, { encoding: 'base64' });
-    // return console.log("we not tweeting boys")
+    return console.log("we not tweeting boys")
     T.post('media/upload', { media_data: b64content }, function (err, data, response) {
         // now we can assign alt text to the media, for use by screen readers and
         // other text-based presentations and interpreters
@@ -138,7 +138,8 @@ const newMotiesThisHour = async () => {
     const currentDate = new Date().getTime();
     var testtime = moment().format(`yyyy-MM-DDTHH:mm`)
     var currentDateTime = testtime + ":00.0-02:00"
-    if (currentDay < 1) {
+    console.log(currentDay < 1)
+    if (parseInt(currentDay) < 1) {
         currentDateTime = currentDateTime.replaceAt(6, `${currentMonth - 1}`)
         currentDateTime = currentDateTime.replaceAt(8, `30`)
         if (currentMonth - 1 === 0) {
@@ -150,7 +151,15 @@ const newMotiesThisHour = async () => {
             currentDateTime = currentDateTime.replaceAt(8, `28`)
         }
     } else {
-        currentDateTime = currentDateTime.replaceAt(8, `${currentDay - 1}`)
+        console.log(currentDateTime)
+        console.log(currentDay.length > 10)
+        let replacement =  currentDay - 1
+        if(currentDay.length > 10){
+            currentDateTime = currentDateTime.replaceAt(8, `${replacement}`)
+        } else {
+            currentDateTime = currentDateTime.replaceAt(9, `${replacement}`)
+        }
+        console.log(currentDateTime)
     }
     try {
         console.log(            `https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/Besluit?$filter=Verwijderd eq false and (BesluitSoort eq 'Stemmen - aangenomen' or BesluitSoort eq 'Stemmen - verworpen') and GewijzigdOp ge ${currentDateTime}&$orderby=GewijzigdOp desc&$expand=Zaak`
@@ -159,7 +168,7 @@ const newMotiesThisHour = async () => {
             `https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/Besluit?$filter=Verwijderd eq false and (BesluitSoort eq 'Stemmen - aangenomen' or BesluitSoort eq 'Stemmen - verworpen') and GewijzigdOp ge ${currentDateTime}&$orderby=GewijzigdOp desc&$expand=Zaak`
         )
         const data = await newMotiesRes.json();
-        // console.log(await data)
+        console.log(await data)
         return await data;
     } catch (error) {
         console.log(error);
@@ -321,8 +330,10 @@ const createStemmingImg = async (stemmingen, zaak) => {
     nodeHtmlToImage({
         output: `./images/${zaak[0].Nummer}.png`,
         selector: '.container',
-        puppeteerArgs: {executablePath: '/usr/bin/chromium-browser',
-        args: ['--no-sandbox', '--disable-setuid-sandbox']},
+        puppeteerArgs: {
+            executablePath: '/usr/bin/chromium-browser',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        },
         beforeScreenshot: function (page) {
             page.setViewport({
                 width: 800,
