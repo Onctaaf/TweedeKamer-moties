@@ -45,7 +45,7 @@ var job = new CronJob(
 
 const shareMotie = async (filename, tweetText) => {
     let b64content = fs.readFileSync(`./images/${filename}.png`, { encoding: 'base64' });
-    //return console.log("we not tweeting boys")
+    return console.log("we not tweeting boys")
     T.post('media/upload', { media_data: b64content }, function (err, data, response) {
         // now we can assign alt text to the media, for use by screen readers and
         // other text-based presentations and interpreters
