@@ -45,7 +45,7 @@ var job = new CronJob(
 
 const shareMotie = async (filename, tweetText) => {
     let b64content = fs.readFileSync(`./images/${filename}.png`, { encoding: 'base64' });
-    return console.log("we not tweeting boys")
+    //return console.log("we not tweeting boys")
     T.post('media/upload', { media_data: b64content }, function (err, data, response) {
         // now we can assign alt text to the media, for use by screen readers and
         // other text-based presentations and interpreters
@@ -82,7 +82,7 @@ const every30minutes = async () => {
     
     for (let i = 0; i < await moties.value.length; i++) {
         // wait for the previous iteration to finish
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         let motie = await moties.value[i];
         const zaak = motie.Zaak
         let besluitId = await motie.Id;
@@ -138,22 +138,22 @@ const newMotiesThisHour = async () => {
     const currentDate = new Date().getTime();
     var testtime = moment().format(`yyyy-MM-DDTHH:mm`)
     var currentDateTime = testtime + ":00.0-02:00"
-    console.log(currentDay < 1)
-    if (parseInt(currentDay) < 1) {
+    console.log(currentDay < 2)
+    if (parseInt(currentDay) < 2) {
         currentDateTime = currentDateTime.replaceAt(6, `${currentMonth - 1}`)
-        currentDateTime = currentDateTime.replaceAt(8, `30`)
+        currentDateTime = currentDateTime.replaceAt(8, `29`)
         if (currentMonth - 1 === 0) {
             currentDateTime = currentDateTime.replaceAt(5, `12`)
             currentDateTime = currentDateTime.replaceAt(7, `${currentYear - 1}`)
         }
         //if it's february change the day to 28
         if (currentMonth - 1 === 1) {
-            currentDateTime = currentDateTime.replaceAt(8, `28`)
+            currentDateTime = currentDateTime.replaceAt(8, `27`)
         }
     } else {
         console.log(currentDateTime)
         console.log(currentDay.length > 10)
-        let replacement =  currentDay - 1
+        let replacement =  currentDay - 2
         if(currentDay.length > 10){
             currentDateTime = currentDateTime.replaceAt(8, `${replacement}`)
         } else {
