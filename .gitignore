@@ -2,3 +2,4 @@ config.env
 notes.txt
 node_modules/
 node_modules
+ecosystem.config.js
