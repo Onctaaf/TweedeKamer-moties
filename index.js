@@ -154,7 +154,7 @@ const newMotiesThisHour = async () => {
         console.log(currentDateTime)
         console.log(currentDay.length > 10)
         let replacement =  currentDay - 2
-        if(currentDay.length > 10){
+        if(parseInt(currentDay) > 10){
             currentDateTime = currentDateTime.replaceAt(8, `${replacement}`)
         } else {
             currentDateTime = currentDateTime.replaceAt(9, `${replacement}`)
