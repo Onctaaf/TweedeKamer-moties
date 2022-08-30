@@ -82,7 +82,7 @@ const every30minutes = async () => {
     
     for (let i = 0; i < await moties.value.length; i++) {
         // wait for the previous iteration to finish
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 10000));
         let motie = await moties.value[i];
         const zaak = motie.Zaak
         let besluitId = await motie.Id;
